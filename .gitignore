@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment files with secrets (keep .env.example)
+.env
+
+# Upload folder (created automatically by the server at runtime)
+backend/uploads/
+
+# Local SQLite file (the app uses PostgreSQL)
+*.db
+
+# Logs and test output
+*.log
+npm-debug.log*
+coverage/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
