@@ -1,135 +1,143 @@
-# ExpenseMate
+# ExpenseMate - Personal Expense Manager
 
-A personal expense manager for tracking income and spending, setting monthly budgets, and understanding where your money goes. ExpenseMate pairs a React dashboard with an Express REST API and a PostgreSQL database, and it keeps working with built-in sample data even when no database is installed.
+Software Construction and Development (SCD) - Assignment 1
 
-Built as a two-person group project for the Software Construction and Development (SCD) course at FAST NUCES.
+ExpenseMate is a web application for recording income and expenses, setting monthly budgets and viewing spending summaries. It was built to demonstrate the full software construction cycle: requirements, design, construction, testing and maintenance
 
 ## Features
 
-- **Dashboard:** see total income, total expenses and net balance for any month, with charts for spending by category and income versus expense.
-- **Transactions:** add, edit, delete, search and filter your income and expense records.
-- **Auto-categorization:** type a description like "Uber ride" or "Grocery" and the app suggests a category. You can always override it.
-- **Monthly budgets:** set a spending cap per category and watch it fill up with colour-coded alerts (see the table below).
-- **Import and export:** upload a CSV or Excel file, review a row-by-row validation preview, then confirm the import. Export all records to CSV with one click.
-- **Multi-currency:** switch between PKR, USD, EUR, GBP, AED and SAR across the whole interface.
-- **Analytics:** spending by category (for a single month or all time), monthly income versus expense, and balances per currency.
-- **Savings goals:** add goals and track progress toward them.
-- **Zero-setup mode:** if PostgreSQL is not running, the app falls back to an in-memory store so you can still try everything.
+1. Dashboard with total income, total expense and net balance, plus doughnut (expense by category) and bar (income vs expense) charts.
+2. Transactions page to add, edit, delete, search and filter records.
+3. Automatic category suggestion from the description (for example "Uber" gives Transport). The user can change the suggestion.
+4. Monthly budget ceilings per category with status levels:
+   - below 80%: Normal
+   - 80% to 89%: Warning
+   - 90% to 99%: Critical
+   - 100% or more: Exceeded
+5. Import of .xlsx and .csv files with a preview and row validation before saving.
+6. Export of all records to CSV.
+7. Multi-currency display (PKR, USD, EUR, GBP, AED, SAR).
+8. PostgreSQL storage with an automatic in-memory fallback when no database server is available.
 
-### Budget alerts
+## Technology Stack
 
-The percentage used is the amount spent divided by the budget limit, rounded.
-
-| Used | Status | Colour |
-|------|--------|--------|
-| Below 80% | Normal | Green |
-| 80% to 89% | Warning | Yellow |
-| 90% to 99% | Critical | Orange |
-| 100% or more | Exceeded | Red |
-
-## Tech Stack
-
-| Layer | Technologies |
-|-------|--------------|
-| Frontend | React 18, Vite, Chart.js (react-chartjs-2), Lucide icons |
-| Backend | Node.js, Express |
-| Database | PostgreSQL, with an in-memory fallback |
-| File import | multer, csv-parser, xlsx |
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, Vite 5, Chart.js |
+| Backend | Node.js, Express 4 |
+| Database | PostgreSQL (via pg), in-memory fallback |
 | Testing | Jest, Supertest |
 
-## Getting Started
+## Project Structure
 
-### Prerequisites
-
-- Node.js 18 or newer
-- PostgreSQL (optional, see below)
-
-### 1. Clone and install
-
-```bash
-git clone https://github.com/abdullahh-0/ExpenseMate.git
-cd ExpenseMate
-
-cd backend
-npm install
-
-cd ../frontend
-npm install
-cd ..
+```text
+Expense Tracker/
+|-- db/
+|   |-- schema.sql              PostgreSQL tables
+|   |-- seed.sql                default categories and sample data
+|-- backend/
+|   |-- controllers/            request handlers
+|   |-- routes/                 REST API routes
+|   |-- db/connection.js        PostgreSQL pool and memory fallback
+|   |-- utils/                  categorizer and validators
+|   |-- tests/api.test.js       API tests
+|   |-- server.js               entry point (port 5001)
+|   |-- .env.example            environment template
+|   |-- package.json
+|-- frontend/
+|   |-- src/
+|   |   |-- components/         reusable UI components
+|   |   |-- pages/              Overview, Transactions, Budgets, Analytics, Goals, Import/Export, Settings
+|   |   |-- services/api.js     API client
+|   |-- vite.config.js          dev server on port 3000, /api proxied to 5001
+|   |-- package.json
+|-- ExpenseMate_Dummy_Dataset_180.xlsx   sample dataset for import
 ```
 
-### 2. Configure the environment
+## Prerequisites
 
-Copy the example file to create your own `.env` inside the `backend` folder:
+- Node.js 18 or newer and npm
+- PostgreSQL (optional). Without it the application runs in in-memory mode and data is lost when the server stops.
 
-```bash
-# macOS / Linux
-cp backend/.env.example backend/.env
+## Setup
 
-# Windows (Command Prompt)
-copy backend\.env.example backend\.env
-```
+1. Install the dependencies:
 
-Open `backend/.env` and set `DB_PASSWORD` and `DATABASE_URL` to match your own PostgreSQL password. If you skip PostgreSQL, you can leave the file as it is.
+   ```bash
+   cd backend
+   npm install
+   cd ../frontend
+   npm install
+   ```
 
-### 3. Set up PostgreSQL (optional)
+2. Create the environment file. Copy `backend/.env.example` to `backend/.env` and set your PostgreSQL password:
 
-Create an empty database. The server creates the tables from `db/schema.sql` and loads the default categories and sample data from `db/seed.sql` the first time it starts.
+   ```text
+   PORT=5001
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=expensemate_db
+   DB_USER=postgres
+   DB_PASSWORD=your_password
+   DATABASE_URL=postgres://postgres:your_password@localhost:5432/expensemate_db
+   ```
 
-```bash
-psql -U postgres -c "CREATE DATABASE expensemate_db;"
-```
+3. Create the database (skip this to use in-memory mode):
 
-If PostgreSQL is not available, the server prints "Running on Memory Fallback mode" and uses built-in sample data instead. In that mode, anything you add is lost when the server restarts.
+   ```sql
+   CREATE DATABASE expensemate_db;
+   ```
 
-### 4. Run the app
+   The tables and default categories are created automatically on first start.
 
-**Option A: single terminal (the backend serves the built frontend)**
+## Running the Application
+
+### Option A: single server (production build)
 
 ```bash
 cd frontend
 npm run build
-
 cd ../backend
 npm start
 ```
 
-Open http://localhost:5001 in your browser.
+Open http://localhost:5001
 
-**Option B: development mode with hot reloading (two terminals)**
+### Option B: development mode (two terminals)
 
-Terminal 1, backend:
+Terminal 1:
 
 ```bash
 cd backend
 npm run dev
 ```
 
-Terminal 2, frontend:
+Terminal 2:
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-Open http://localhost:3000. Requests to `/api` are proxied to the backend on port 5001.
+Open http://localhost:3000
 
-## Importing Your Own Data
+## API Endpoints
 
-Open the Import / Export page and upload a `.csv` or `.xlsx` file (up to 16 MB). The app shows a preview that marks each row as valid or invalid, and nothing is saved until you confirm.
-
-A sample file, `ExpenseMate_Dummy_Dataset_180.xlsx`, is included in the project root. It has 180 transactions with these columns:
-
-| Column | Example |
-|--------|---------|
-| Transaction_ID | TXN-0076 |
-| Date | 2026-01-01 |
-| Description | Gas Bill |
-| Category | Bills |
-| Type | Expense |
-| Amount | 11700 |
-
-The importer also accepts an optional Currency column. Rows without one use the default currency you choose in the import screen.
+| Method | Path | Purpose |
+|---|---|---|
+| GET | /api/categories | list categories |
+| GET | /api/transactions | list transactions (search and filter options) |
+| POST | /api/transactions | create a transaction |
+| PUT | /api/transactions/:id | update a transaction |
+| DELETE | /api/transactions/:id | delete a transaction |
+| POST | /api/transactions/suggest-category | suggest a category from a description |
+| GET | /api/budgets | budget summary with status |
+| POST | /api/budgets | create or update a budget |
+| DELETE | /api/budgets/:id | delete a budget |
+| GET | /api/dashboard | dashboard totals and breakdowns |
+| POST | /api/import/preview | upload and validate a spreadsheet |
+| POST | /api/import/confirm | save the validated rows |
+| GET | /api/export/csv | download all records as CSV |
 
 ## Running the Tests
 
@@ -138,71 +146,12 @@ cd backend
 npm test
 ```
 
-The Jest suite covers the main API endpoints: categories, category suggestion, creating and listing transactions, budgets, and the dashboard.
+Expected result: 1 suite, 6 tests, all passing (categories, category suggestion, create transaction, list transactions, budget status, dashboard).
 
-## API Reference
+## Importing the Sample Dataset
 
-All endpoints are under `/api`.
+Open the Import / Export page, choose `ExpenseMate_Dummy_Dataset_180.xlsx`, check the preview and click the confirm button.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Check that the server is running |
-| GET | `/api/categories` | List categories (optional `?type=income` or `?type=expense`) |
-| GET | `/api/transactions` | List transactions (filters: `search`, `type`, `category_id`, `currency`, `sort_by`, `startDate`, `endDate`) |
-| POST | `/api/transactions` | Create a transaction |
-| PUT | `/api/transactions/:id` | Update a transaction |
-| DELETE | `/api/transactions/:id` | Delete a transaction |
-| POST | `/api/transactions/suggest-category` | Suggest a category from a description |
-| GET | `/api/budgets` | List budgets with spending status (`month`, `year`, `currency`) |
-| POST | `/api/budgets` | Create or update a monthly budget |
-| DELETE | `/api/budgets/:id` | Delete a budget |
-| GET | `/api/dashboard` | Dashboard totals and chart data (`month`, `year`, `currency`) |
-| POST | `/api/import/preview` | Upload a CSV or Excel file and get a validation preview |
-| POST | `/api/import/confirm` | Save the previewed records |
-| GET | `/api/export/csv` | Download all transactions as CSV |
+## Documentation
 
-## Project Structure
-
-```
-ExpenseMate/
-├── backend/
-│   ├── controllers/        # Request handling and business logic
-│   ├── db/connection.js    # PostgreSQL pool and in-memory fallback
-│   ├── routes/             # REST API routes
-│   ├── utils/              # Auto-categorizer and input validators
-│   ├── tests/              # Jest API tests
-│   ├── server.js           # Express entry point
-│   └── .env.example        # Environment template
-├── db/
-│   ├── schema.sql          # Table definitions
-│   └── seed.sql            # Default categories and sample data
-├── frontend/
-│   ├── src/
-│   │   ├── components/     # Sidebar, topbar, modals and shared UI
-│   │   ├── pages/          # Overview, Transactions, Analytics, Budgets, Goals, Settings, Import/Export
-│   │   ├── services/api.js # API client
-│   │   └── App.jsx         # App root
-│   └── vite.config.js      # Dev server and API proxy
-└── ExpenseMate_Dummy_Dataset_180.xlsx
-```
-
-## Database
-
-Three tables, created from `db/schema.sql`:
-
-- **categories:** `id`, `name` (unique), `type` (income or expense)
-- **transactions:** `id`, `date`, `description`, `amount` (must be positive), `type`, `category_id`, `currency`, `created_at`
-- **budgets:** `id`, `category_id`, `month`, `year`, `amount`, `currency`, with one budget allowed per category, month, year and currency
-
-## How It Works
-
-- **Architecture:** a three-tier design. The React app talks to the Express API, which talks to the database layer.
-- **Auto-categorization:** `backend/utils/categorizer.js` does case-insensitive keyword matching on the description, for example "uber" gives Transport and "salary" gives Salary. If nothing matches, it suggests Other.
-- **Validation:** amounts must be greater than zero, dates must be valid, and the type must be income or expense. Invalid input is rejected with a clear message.
-- **Database fallback:** the server tries PostgreSQL first. If it cannot connect, it switches to an in-memory store without crashing.
-
-## Known Limitations
-
-- There is no user login, so the app is meant for single-user, local use.
-- Savings goals live only in the browser session and are not saved to the database, so they reset when you reload the page.
-- In memory-fallback mode, data is not saved between server restarts.
+The Assignment 1 documents are in the submission folder: SRS_Document, Architecture_Document, Test_Cases, Metrics Report and Final_Report.
