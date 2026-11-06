@@ -2,7 +2,9 @@
 
 Software Construction and Development (SCD) - Assignment 1
 
-ExpenseMate is a web application for recording income and expenses, setting monthly budgets and viewing spending summaries. It was built to demonstrate the full software construction cycle: requirements, design, construction, testing and maintenance
+ExpenseMate is a web application for recording income and expenses, setting monthly budgets and viewing spending summaries. It was built to demonstrate the full software construction cycle: requirements, design, construction, testing and maintenance.
+
+Team: Areebah Khan and Muhammad Abdullah
 
 ## Features
 
